@@ -17,6 +17,7 @@ Total_error = 0
 Last_error = False
 pengingat1 = False
 pengingat2 = False
+Tidur = False
 def getGroups():
     cursor = db_groups.find().sort([("$natural", -1)]).limit(10)
     return cursor
@@ -77,18 +78,19 @@ def blanky_main():
             Total_test = 0
             Total_error = 0
 
-        testx = TestLogin()
-        if testx:
+        if Tidur==False:
             testx = TestLogin()
             if testx:
-                Last_error=True
-                for row in getGroups():
-                    bot.sendMessage(row['group_id'], testx)
-        else:
-            if Last_error==True:
-                Last_error=False
-                for row in getGroups():
-                    bot.sendMessage(row['group_id'], 'Miaauuu \nLogin sudah normal mas')
+                testx = TestLogin()
+                if testx:
+                    Last_error=True
+                    for row in getGroups():
+                        bot.sendMessage(row['group_id'], testx)
+            else:
+                if Last_error==True:
+                    Last_error=False
+                    for row in getGroups():
+                        bot.sendMessage(row['group_id'], 'Miaauuu \nLogin sudah normal mas')
 
         Pengingat()
         time.sleep(60)
@@ -96,6 +98,7 @@ def blanky_main():
 def handle(msg):
     global Total_test
     global Total_error
+    global Tidur
     content_type, chat_type, chat_id = telepot.glance(msg)
 
     if content_type != 'text':
@@ -115,16 +118,25 @@ def handle(msg):
         return
 
     if len(command) < 2:
-        bot.sendMessage(chat_id, 'Miaauuu \n \nList Command: \n - blanky bisaapa \n - blanky status \n - blanky dimana \n \n https://github.com/ojixzzz/Blanky-Aks')
+        bot.sendMessage(chat_id, 'Miaauuu \n \nList Command: \n - blanky bisaapa \n - blanky status \n - blanky dimana \n - blanky tidur \n - blanky bangun \n \n https://github.com/ojixzzz/Blanky-Aks')
         return
     
     if command[1]=='bisaapa':
         bot.sendMessage(chat_id, 'Miaauuu \n- Monitoring api login (per menit) \n- Pengingat (proses) \n- ngiseng')
     elif command[1]=='status':
-        bot.sendMessage(chat_id, 'Miaauuu \nMonitoring api login: \n - Total test = %s \n - Total error = %s \n \n Pengingat \n - Masih statis (tes brangkat jam 11 + pulang 17)' % (Total_test, Total_error))
+        if Tidur==True:
+            bot.sendMessage(chat_id, 'Lagi tidur!')
+        else:
+            bot.sendMessage(chat_id, 'Miaauuu \nMonitoring api login: \n - Total test = %s \n - Total error = %s \n \n Pengingat \n - Masih statis (tes brangkat jam 11 + pulang 17)' % (Total_test, Total_error))
     elif command[1]=='dimana':
         for row in getGroups():
             bot.sendMessage(chat_id, '- grup %s' % row['group_name'])
+    elif command[1]=='tidur':
+        Tidur = True
+        bot.sendMessage(chat_id, 'Okee fine!')
+    elif command[1]=='bangun':
+        Tidur = False
+        bot.sendMessage(chat_id, 'Miauuuuu')
 
 bot = telepot.Bot(TELEGRAM_TOKEN)
 bot.message_loop(handle)
