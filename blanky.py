@@ -31,7 +31,7 @@ def Pengingat():
         if pengingat1==False:
             pengingat1 = True
             for row in getGroups():
-                bot.sendMessage(row['group_id'], 'Miaauuu \nSelamat bekerja dap!')
+                bot.sendMessage(row['group_id'], 'Meong \nSelamat bekerja!')
     else:
         pengingat1 = False
 
@@ -39,7 +39,7 @@ def Pengingat():
         if pengingat2==False:
             pengingat2 = True
             for row in getGroups():
-                bot.sendMessage(row['group_id'], 'Miaauuu \nUdah waktunya pulang')
+                bot.sendMessage(row['group_id'], 'Meong \nUdah waktunya pulang')
     else:
         pengingat2 = False
 
@@ -53,17 +53,21 @@ def TestLogin():
     }
     url = LOGIN_URL
     datapost = LOGIN_DATA
-    req = requests.post(url, headers=headers, data=json.dumps(datapost))
-    if req.status_code != 200:
-        Total_error += 1
-        return 'Miaauuu \nLogin bermasalah kang, status code bukan 200'
 
-    if req.text:
-        resjson = json.loads(req.text)
-        if resjson['meta']['code'] != 200:
+    try:
+        req = requests.post(url, headers=headers, data=json.dumps(datapost))
+        if req.status_code != 200:
             Total_error += 1
-            return 'Miaauuu \nLogin bermasalah kang, err message : %s' % resjson['meta'].get('error_message')
-        
+            return 'Meong \nLogin bermasalah, status code bukan 200'
+
+        if req.text:
+            resjson = json.loads(req.text)
+            if resjson['meta']['code'] != 200:
+                Total_error += 1
+                return 'Meong \nLogin bermasalah, err message : %s' % resjson['meta'].get('error_message')
+    except Exception as e:
+        return 'Meong \n%s' % str(e)
+
     return False
 
 def blanky_main():
@@ -90,7 +94,7 @@ def blanky_main():
                 if Last_error==True:
                     Last_error=False
                     for row in getGroups():
-                        bot.sendMessage(row['group_id'], 'Miaauuu \nLogin sudah normal mas')
+                        bot.sendMessage(row['group_id'], 'Meong \nLogin sudah normal mas')
 
         Pengingat()
         time.sleep(60)
