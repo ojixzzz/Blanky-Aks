@@ -10,20 +10,26 @@ import operator
 from threading import Thread
 from datetime import datetime, timedelta
 from pymongo import MongoClient
-from config import MONGO_HOST, MONGO_PORT, TELEGRAM_TOKEN, LOGIN_URL, LOGIN_DATA
+from config import MONGO_HOST, MONGO_PORT, TELEGRAM_TOKEN, LOGIN_URL, LOGIN_DATA, API_TESTS_URL
 
 mongoDB = MongoClient(MONGO_HOST, MONGO_PORT)
 database = mongoDB.blankyaks
 db_groups = database.groups
+db_settings = database.settings
 
+headers = {
+    'User-Agent': 'BlankyBot Aks v1.0'
+}
 group_id_ijak = '-19993514'
 Total_test = 0
 Total_error = 0
 Last_error = False
+Last_error_api = False
 pengingat1 = False
 pengingat2 = False
 Tidur = False
 var_rapat = False
+blanky_versong = 1
 
 ojix = 0
 plendok = 0
@@ -34,6 +40,25 @@ hendra = 0
 def getGroups():
     cursor = db_groups.find().sort([("$natural", -1)]).limit(10)
     return cursor
+
+def whatsNew():
+    dataout = {
+        'setting_name': 'versi',
+        'setting_data': blanky_versong
+    }
+    cursor = db_settings.find_one({"setting_name": "versi"})
+    if not cursor:
+        db_settings.insert_one(dataout).inserted_id
+    else:
+        if cursor.get('setting_data')!=blanky_versong:
+            db_settings.replace_one({'setting_name': 'versi'}, dataout, upsert=True)
+        else:
+            return False
+
+    for row in getGroups():
+        bot.sendMessage(row['group_id'], 'Whats new!!! \n- Penambahan pesan ini\n- Pengecekan NAS Mounted (dari API dashboard)')
+
+    return True
 
 def acakAcak():
     global group_id_ijak
@@ -161,6 +186,29 @@ def TestLogin():
 
     return False
 
+def API_TESTS():
+    global Last_error_api
+    try:
+        for url in API_TESTS_URL:
+            req = requests.get(url, headers=headers)
+            if req.text:
+                resjson = json.loads(req.text)
+                if resjson.get('status') != 1:
+                    if Last_error==False:
+                        Last_error_api=True
+                        for row in getGroups():
+                            bot.sendMessage(row['group_id'], resjson.get('message'))
+                else:
+                    if Last_error==True:
+                        Last_error_api=False
+                        for row in getGroups():
+                            bot.sendMessage(row['group_id'], resjson.get('message'))
+
+    except Exception as e:
+        print 'Meong \n%s' % str(e)
+
+    return False
+
 def blanky_main():
     global Total_test
     global Total_error
@@ -186,6 +234,8 @@ def blanky_main():
                     Last_error=False
                     for row in getGroups():
                         bot.sendMessage(row['group_id'], 'Meong \nLogin sudah normal mas')
+
+            API_TESTS()
 
         Pengingat()
         acakRapat()
@@ -239,6 +289,7 @@ def handle(msg):
 
 bot = telepot.Bot(TELEGRAM_TOKEN)
 bot.message_loop(handle)
+whatsNew()
 print ('Listening ...')
 
 # t = Thread(target=blanky_main)
