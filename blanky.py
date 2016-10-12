@@ -194,12 +194,12 @@ def API_TESTS():
             if req.text:
                 resjson = json.loads(req.text)
                 if resjson.get('status') != 1:
-                    if Last_error==False:
+                    if Last_error_api==False:
                         Last_error_api=True
                         for row in getGroups():
                             bot.sendMessage(row['group_id'], resjson.get('message'))
                 else:
-                    if Last_error==True:
+                    if Last_error_api==True:
                         Last_error_api=False
                         for row in getGroups():
                             bot.sendMessage(row['group_id'], resjson.get('message'))
