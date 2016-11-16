@@ -23,6 +23,7 @@ headers = {
 group_id_ijak = '-19993514'
 Total_test = 0
 Total_error = 0
+Total_error_login = 0
 Last_error = False
 Last_error_api = False
 pengingat1 = False
@@ -160,6 +161,7 @@ def Pengingat():
 def TestLogin():
     global Total_test
     global Total_error
+    global Total_error_login
 
     Total_test += 1 
     headers = {
@@ -172,12 +174,14 @@ def TestLogin():
         req = requests.post(url, headers=headers, data=json.dumps(datapost))
         if req.status_code != 200:
             Total_error += 1
+            Total_error_login += 1
             return 'Meong \nLogin bermasalah, status code bukan 200'
 
         if req.text:
             resjson = json.loads(req.text)
             if resjson['meta']['code'] != 200:
                 Total_error += 1
+                Total_error_login += 1
                 return 'Meong \nLogin bermasalah, err message : %s' % resjson['meta'].get('error_message')
     except Exception as e:
         return 'Meong \n%s' % str(e)
@@ -211,6 +215,7 @@ def blanky_main():
     global Total_test
     global Total_error
     global Last_error
+    global Total_error_login
     while True:
         if not getGroups():
             bot.sendMessage('89093938', 'Grup_id diluar kendali mastah')
@@ -225,13 +230,16 @@ def blanky_main():
                 testx = TestLogin()
                 if testx:
                     Last_error=True
-                    for row in getGroups():
-                        bot.sendMessage(row['group_id'], testx)
+                    if Total_error_login > 1:
+                        for row in getGroups():
+                            bot.sendMessage(row['group_id'], testx)
             else:
                 if Last_error==True:
                     Last_error=False
-                    for row in getGroups():
-                        bot.sendMessage(row['group_id'], 'Meong \nLogin sudah normal mas')
+                    if Total_error_login > 1:
+                        for row in getGroups():
+                            bot.sendMessage(row['group_id'], 'Meong \nLogin sudah normal mas')
+                    Total_error_login = 0
 
             API_TESTS()
 
