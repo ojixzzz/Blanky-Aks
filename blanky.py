@@ -146,16 +146,14 @@ def Pengingat():
     if sekarang > 110000:
         if pengingat1==False:
             pengingat1 = True
-            for row in getGroups():
-                bot.sendMessage(group_id_ijak, 'Meong \nSelamat bekerja!')
+            bot.sendMessage(group_id_ijak, 'Meong \nSelamat bekerja!')
     else:
         pengingat1 = False
 
     if sekarang > 170000:
         if pengingat2==False:
             pengingat2 = True
-            for row in getGroups():
-                bot.sendMessage(group_id_ijak, 'Meong \nUdah waktunya pulang')
+            bot.sendMessage(group_id_ijak, 'Meong \nUdah waktunya pulang')
     else:
         pengingat2 = False
 
