@@ -6,11 +6,12 @@ import json
 import random
 from random import randint
 import operator
+import mandrill
 
 from threading import Thread
 from datetime import datetime, timedelta
 from pymongo import MongoClient
-from config import MONGO_HOST, MONGO_PORT, TELEGRAM_TOKEN, LOGIN_URL, LOGIN_DATA, API_TESTS_URL
+from config import MONGO_HOST, MONGO_PORT, TELEGRAM_TOKEN, LOGIN_URL, LOGIN_DATA, API_TESTS_URL, MANDRILL_TOKEN, MANDRILL_EMAIL, MANDRILL_NAME
 
 mongoDB = MongoClient(MONGO_HOST, MONGO_PORT)
 database = mongoDB.blankyaks
@@ -57,9 +58,20 @@ def whatsNew():
             return False
 
     for row in getGroups():
-        bot.sendMessage(row['group_id'], 'Whats new!!! \n- Penambahan pesan ini\n- Pengecekan NAS Mounted (dari API dashboard)')
+        bot.sendMessage(row['group_id'], 'Whats new!!! \n- Penambahan kemampuan cek api mandrill')
 
     return True
+
+def send_mandrill(subjek, email, nama, html):
+    mandrill_client = mandrill.Mandrill(MANDRILL_TOKEN)
+    message = {}
+    message['subject'] = subjek
+    message['html'] = html
+    message['to'] = [{'email':email, 'name':nama, 'type':'to'}]
+    message['from_email'] = MANDRILL_EMAIL
+    message['from_name'] = MANDRILL_NAME
+    result = mandrill_client.messages.send(message=message, async=False)
+    return result
 
 def acakAcak():
     global group_id_ijak
@@ -148,6 +160,12 @@ def Pengingat():
         if pengingat1==False:
             pengingat1 = True
             bot.sendMessage(group_id_ijak, 'Meong \nSelamat bekerja!')
+            retemail = send_mandrill('testing', 'ligerxrendy@gmail.com', '', 'tes email')
+            if retemail:
+                if retemail.get('status')!='sent':
+                    for row in getGroups():
+                        bot.sendMessage(row['group_id'], 'Meooong \nEmail mandrill error \nStatus: %s' % retemail.get('status'))
+
     else:
         pengingat1 = False
 
@@ -244,7 +262,7 @@ def blanky_main():
             API_TESTS()
 
         Pengingat()
-        acakRapat()
+        #acakRapat()
         time.sleep(60)
 
 def handle(msg):
