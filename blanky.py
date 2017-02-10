@@ -31,7 +31,7 @@ pengingat1 = False
 pengingat2 = False
 Tidur = False
 var_rapat = False
-blanky_versong = 1
+blanky_versong = 2
 
 ojix = 0
 plendok = 0
@@ -162,9 +162,9 @@ def Pengingat():
             bot.sendMessage(group_id_ijak, 'Meong \nSelamat bekerja!')
             retemail = send_mandrill('testing', 'ligerxrendy@gmail.com', '', 'tes email')
             if retemail:
-                if retemail.get('status')!='sent':
+                if retemail[0].get('status')!='sent':
                     for row in getGroups():
-                        bot.sendMessage(row['group_id'], 'Meooong \nEmail mandrill error \nStatus: %s' % retemail.get('status'))
+                        bot.sendMessage(row['group_id'], 'Meooong \nEmail mandrill error \nStatus: %s' % retemail[0].get('status'))
 
     else:
         pengingat1 = False
